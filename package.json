@@ -1,13 +1,14 @@
 {
   "name": "cliptube-backend",
   "version": "1.0.0",
-  "description": "Backend downloader gratis buat Rafsan",
+  "description": "Backend downloader mandiri gratis buat Rafsan",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.19.2",
-    "yt-dlp-exec": "^1.0.2"
+    "cors": "^2.8.5",
+    "ytdl-core": "^4.11.5"
   }
 }
