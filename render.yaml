@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: cliptube-backend
+    env: node
+    plan: free
+    buildCommand: |
+      npm install
+      mkdir -p jsonpkg && cd jsonpkg
+      curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o yt-dlp
+      chmod a+rx yt-dlp
+      export PATH=$PATH:$(pwd)
+      cd ..
+    startCommand: export PATH=$PATH:$(pwd)/jsonpkg && npm start
