@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const ytdl = require('ytdl-core');
+const ytdl = require('@distube/ytdl-core');
 const app = express();
 
 app.use(cors());
@@ -12,21 +12,26 @@ app.get('/extract', async (req, res) => {
     }
 
     // JALUR 1: Jika user memasukkan link YouTube / Shorts
-    if (videoUrl.contains("youtube.com") || videoUrl.contains("youtu.be")) {
+    if (videoUrl.includes("youtube.com") || videoUrl.includes("youtu.be")) {
         try {
-            // Ambil info video menggunakan ytdl-core (Murni JS)
-            const info = await ytdl.getInfo(videoUrl);
+            // Ambil info video menggunakan engine distube yang kebal blokir
+            const info = await ytdl.getInfo(videoUrl, {
+                requestOptions: {
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                    }
+                }
+            });
             
-            // Filter format yang punya audio dan video sekaligus
+            // Ambil format video + audio gabungan
             const formats = ytdl.filterFormats(info.formats, 'audioandvideo');
-            
             const daftarFormat = formats.map(f => ({
-                quality: f.qualityLabel + " (MP4)",
+                quality: (f.qualityLabel || '720p') + " (MP4)",
                 download_url: f.url,
                 ext: "mp4"
             }));
 
-            // Tambahkan opsi format audio saja (MP3)
+            // Tambahkan opsi format audio (MP3)
             const audioFormats = ytdl.filterFormats(info.formats, 'audioonly');
             if (audioFormats.length > 0) {
                 daftarFormat.push({
@@ -37,7 +42,7 @@ app.get('/extract', async (req, res) => {
             }
 
             return res.json({
-                title: info.videoDetails.title,
+                title: info.videoDetails.title || "ClipTube Video",
                 formats: daftarFormat
             });
 
@@ -47,9 +52,8 @@ app.get('/extract', async (req, res) => {
     } 
     
     // JALUR 2: Jika user memasukkan link TikTok
-    else if (videoUrl.contains("tiktok.com")) {
+    else if (videoUrl.includes("tiktok.com")) {
         try {
-            // Trik bypass cepat TikTok tanpa watermark menggunakan API terpercaya ttdown
             const response = await fetch(`https://api.tik-wm.com/api/v1/download?url=${encodeURIComponent(videoUrl)}`);
             const data = await response.json();
             
